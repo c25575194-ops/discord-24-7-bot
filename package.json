@@ -1,0 +1,13 @@
+{
+  "name": "discord-24-7-bot",
+  "version": "1.0.0",
+  "description": "Discord bot running 24/7 on Render",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "express": "^4.18.2"
+  }
+}
