@@ -14,23 +14,27 @@ const client = new Client({
   ]
 });
 
-client.once('ready', () => {
+client.once('ready', async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 
-  const channelId = '1426978162545528872'; // 1426978162545528872
-  const guildId = '13508208198566854083'; // 1350820198566854803
-  const channel = client.channels.cache.get(channelId);
+  const channelId = '1426978162545528872'; // Voice channel ID
+  const guildId = '13508208198566854083'; // Guild ID
 
-  if (!channel) return console.log('❌ ไม่เจอห้องเสียง ตรวจสอบ ID อีกครั้ง');
+  try {
+    const channel = await client.channels.fetch(channelId);
+    if (!channel) return console.log('❌ ไม่เจอห้องเสียง ตรวจสอบ ID อีกครั้ง');
 
-  joinVoiceChannel({
-    channelId: channel.id,
-    guildId: guildId,
-    adapterCreator: channel.guild.voiceAdapterCreator,
-    selfDeaf: false
-  });
+    joinVoiceChannel({
+      channelId: channel.id,
+      guildId: guildId,
+      adapterCreator: channel.guild.voiceAdapterCreator,
+      selfDeaf: false
+    });
 
-  console.log('🎵 เข้าห้องเสียงสำเร็จและจะอยู่ตลอด 24 ชั่วโมง');
+    console.log('🎵 เข้าห้องเสียงสำเร็จและจะอยู่ตลอด 24 ชั่วโมง');
+  } catch (error) {
+    console.error('⚠️ Error joining voice channel:', error);
+  }
 });
 
 client.login(process.env.DISCORD_TOKEN);
