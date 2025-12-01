@@ -1,72 +1,47 @@
-import { Client, GatewayIntentBits } from 'discord.js';
-import { joinVoiceChannel, createAudioPlayer, NoSubscriberBehavior } from '@discordjs/voice';
-import express from 'express';
-import dotenv from 'dotenv';
+require("dotenv").config();
 
-dotenv.config();
+const { Client, GatewayIntentBits } = require("discord.js");
+const { joinVoiceChannel } = require("@discordjs/voice");
 
-const app = express();
-const port = process.env.PORT || 10000;
-app.get('/', (req, res) => res.send('Bot is running!'));
-app.listen(port, () => console.log(`✅ Web server running on port ${port}`));
+// โหลดตัวแปร .env
+const TOKEN = process.env.DISCORD_TOKEN;
+const VOICE_CHANNEL_ID = process.env.VOICE_CHANNEL_ID;
+const GUILD_ID = process.env.GUILD_ID;
 
+// สร้าง client Discord
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildVoiceStates
-  ],
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates
+    ]
 });
 
-let targetChannelId = process.env.VOICE_CHANNEL_ID;
-let targetGuildId = process.env.GUILD_ID;
+// เมื่อบอทออนไลน์
+client.once("ready", () => {
+    console.log(`✅ บอทออนไลน์ในชื่อ: ${client.user.tag}`);
 
-const player = createAudioPlayer({
-  behaviors: {
-    noSubscriber: NoSubscriberBehavior.Play,
-  },
-});
+    const guild = client.guilds.cache.get(GUILD_ID);
+    const channel = client.channels.cache.get(VOICE_CHANNEL_ID);
 
-// ฟังก์ชันเข้าห้องเสียง
-function joinChannel() {
-  try {
-    const guild = client.guilds.cache.get(targetGuildId);
-    const channel = guild.channels.cache.get(targetChannelId);
-    if (!channel) return console.log("❌ ไม่พบห้องเสียง ตรวจสอบ VOICE_CHANNEL_ID อีกครั้ง");
-
-    const connection = joinVoiceChannel({
-      channelId: channel.id,
-      guildId: guild.id,
-      adapterCreator: guild.voiceAdapterCreator,
-      selfDeaf: false,
-    });
-
-    connection.subscribe(player);
-    console.log("🎧 เข้าห้องเสียงเรียบร้อยแล้ว:", channel.name);
-
-    // ถ้าหลุดจากเสียง จะพยายามเชื่อมใหม่
-    connection.on('disconnect', () => {
-      console.log('⚠️ หลุดจากห้องเสียง กำลังเชื่อมใหม่...');
-      setTimeout(joinChannel, 5000);
-    });
-
-  } catch (err) {
-    console.error('❌ Error joining voice channel:', err);
-  }
-}
-
-client.once('ready', () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
-  joinChannel();
-
-  // ระบบตรวจทุก 10 นาที ว่ายังอยู่ไหม
-  setInterval(() => {
-    const guild = client.guilds.cache.get(targetGuildId);
-    const connection = guild?.voiceAdapterCreator;
-    if (!connection) {
-      console.log("🔁 ไม่พบการเชื่อมต่อ กำลังเข้าห้องใหม่...");
-      joinChannel();
+    if (!guild) {
+        console.log("❌ ไม่พบ GUILD_ID ตรวจสอบใน .env");
+        return;
     }
-  }, 10 * 60 * 1000);
+
+    if (!channel) {
+        console.log("❌ ไม่พบห้องเสียง ตรวจสอบ VOICE_CHANNEL_ID ใหม่ใน .env");
+        return;
+    }
+
+    // ให้บอทเข้าห้องเสียง
+    joinVoiceChannel({
+        channelId: channel.id,
+        guildId: guild.id,
+        adapterCreator: guild.voiceAdapterCreator,
+    });
+
+    console.log("🎧 บอทเข้าห้องเสียงเรียบร้อย!");
 });
 
-client.login(process.env.TOKEN);
+// ล็อกอินบอท
+client.login(TOKEN);
