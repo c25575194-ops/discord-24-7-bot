@@ -1,14 +1,16 @@
+// บังคับใช้ opusscript เพื่อให้ Render รองรับ voice
+process.env.DISCORDJS_OPUS = "opusscript";
+process.env.DOCKER_SKIP_GLIBC_CHECK = "1";
+
 require("dotenv").config();
 
 const { Client, GatewayIntentBits } = require("discord.js");
 const { joinVoiceChannel } = require("@discordjs/voice");
 
-// โหลดตัวแปร .env
 const TOKEN = process.env.DISCORD_TOKEN;
 const VOICE_CHANNEL_ID = process.env.VOICE_CHANNEL_ID;
 const GUILD_ID = process.env.GUILD_ID;
 
-// สร้าง client Discord
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -16,32 +18,28 @@ const client = new Client({
     ]
 });
 
-// เมื่อบอทออนไลน์
 client.once("ready", () => {
-    console.log(`✅ บอทออนไลน์ในชื่อ: ${client.user.tag}`);
+    console.log(`✅ บอทออนไลน์: ${client.user.tag}`);
 
     const guild = client.guilds.cache.get(GUILD_ID);
     const channel = client.channels.cache.get(VOICE_CHANNEL_ID);
 
-    if (!guild) {
-        console.log("❌ ไม่พบ GUILD_ID ตรวจสอบใน .env");
-        return;
-    }
+    if (!guild) return console.log("❌ ไม่พบ GUILD_ID");
+    if (!channel) return console.log("❌ ไม่พบ VOICE_CHANNEL_ID");
 
-    if (!channel) {
-        console.log("❌ ไม่พบห้องเสียง ตรวจสอบ VOICE_CHANNEL_ID ใหม่ใน .env");
-        return;
-    }
-
-    // ให้บอทเข้าห้องเสียง
-    joinVoiceChannel({
+    // เข้าห้องเสียง
+    const connection = joinVoiceChannel({
         channelId: channel.id,
         guildId: guild.id,
         adapterCreator: guild.voiceAdapterCreator,
+        selfDeaf: false,
+        selfMute: false
     });
+
+    // ป้องกัน Render error "No compatible encryption modes"
+    connection.receiver.speaking.on("start", () => {});
 
     console.log("🎧 บอทเข้าห้องเสียงเรียบร้อย!");
 });
 
-// ล็อกอินบอท
 client.login(TOKEN);
