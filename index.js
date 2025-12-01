@@ -1,3 +1,6 @@
+process.env.DISCORDJS_NO_SUPERNOVA = "1";
+
+
 // บังคับใช้ opusscript เพื่อให้ Render รองรับ voice
 process.env.DISCORDJS_OPUS = "opusscript";
 process.env.DOCKER_SKIP_GLIBC_CHECK = "1";
