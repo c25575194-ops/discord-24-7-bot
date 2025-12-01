@@ -13,11 +13,7 @@
     "discord.js": "^14.13.0",
     "dotenv": "^16.3.1",
     "@discordjs/voice": "^0.17.0",
-    
-    // ให้ใช้ opusscript แทน sodium เพื่อแก้ error encryption modes
     "opusscript": "^0.0.8",
-
-    // express (Render ต้องมีเพื่อกัน sleep)
     "express": "^4.18.2"
   }
 }
