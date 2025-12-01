@@ -4,6 +4,22 @@ process.env.DOCKER_SKIP_GLIBC_CHECK = "1";
 
 require("dotenv").config();
 
+// -----------------------------
+// ✅ Web Server สำหรับ Render + UptimeRobot
+// -----------------------------
+const express = require("express");
+const app = express();
+
+app.get("/", (req, res) => {
+    res.send("Bot is running 24/7");
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log("🌐 Web server is running on port " + port);
+});
+// -----------------------------
+
 const { Client, GatewayIntentBits } = require("discord.js");
 const { joinVoiceChannel } = require("@discordjs/voice");
 
